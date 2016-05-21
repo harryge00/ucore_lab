@@ -88,6 +88,8 @@ default_alloc_pages(size_t n) {
     }
     struct Page *page = NULL;
     list_entry_t *le = &free_list;
+    struct Page *pp = le2page(list_next(le), page_link);
+    cprintf("first page: %08x, flag:%d property:%d\n", pp, pp->flags, pp->property);
     while ((le = list_next(le)) != &free_list) {
         struct Page *p = le2page(le, page_link);
         if (p->property >= n) {
@@ -110,6 +112,7 @@ default_alloc_pages(size_t n) {
 
 static void
 default_free_pages(struct Page *base, size_t n) {
+    cprintf("free_pages: %08x, n:%d, flag:%d property:%d\n", base, n, base->flags, base->property);
     assert(n > 0);
     struct Page *p = base;
     for (; p != base + n; p ++) {
@@ -151,7 +154,7 @@ basic_check(void) {
     assert((p0 = alloc_page()) != NULL);
     assert((p1 = alloc_page()) != NULL);
     assert((p2 = alloc_page()) != NULL);
-
+    cprintf("after allocating p0 %08x p1 %08x p2 %08x:%d\n", p0, p1, p2, nr_free_pages());
     assert(p0 != p1 && p0 != p2 && p1 != p2);
     assert(page_ref(p0) == 0 && page_ref(p1) == 0 && page_ref(p2) == 0);
 
@@ -162,6 +165,7 @@ basic_check(void) {
     list_entry_t free_list_store = free_list;
     list_init(&free_list);
     assert(list_empty(&free_list));
+    cprintf("freepage:%d, %d\n", nr_free, nr_free_pages());
 
     unsigned int nr_free_store = nr_free;
     nr_free = 0;
@@ -172,6 +176,7 @@ basic_check(void) {
     free_page(p1);
     free_page(p2);
     assert(nr_free == 3);
+    cprintf("freepage:%d, %d\n", nr_free, nr_free_pages());
 
     assert((p0 = alloc_page()) != NULL);
     assert((p1 = alloc_page()) != NULL);
@@ -204,10 +209,11 @@ default_check(void) {
     while ((le = list_next(le)) != &free_list) {
         struct Page *p = le2page(le, page_link);
         assert(PageProperty(p));
+        cprintf("property:%d, count %d\n", p->property, count);
         count ++, total += p->property;
     }
     assert(total == nr_free_pages());
-
+    cprintf("total:%d\n", total);
     basic_check();
 
     struct Page *p0 = alloc_pages(5), *p1, *p2;
