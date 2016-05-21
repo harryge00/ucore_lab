@@ -228,7 +228,7 @@ default_check(void) {
     while ((le = list_next(le)) != &free_list) {
         struct Page *p = le2page(le, page_link);
         assert(PageProperty(p));
-        cprintf("property:%d, count %d\n", p->property, count);
+        // cprintf("property:%d, count %d\n", p->property, count);
         count ++, total += p->property;
     }
     assert(total == nr_free_pages());
