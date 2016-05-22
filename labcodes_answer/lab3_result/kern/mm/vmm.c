@@ -174,7 +174,7 @@ check_vmm(void) {
 static void
 check_vma_struct(void) {
     size_t nr_free_pages_store = nr_free_pages();
-
+    cprintf("freepages:%d\n", nr_free_pages());
     struct mm_struct *mm = mm_create();
     assert(mm != NULL);
 
@@ -186,12 +186,14 @@ check_vma_struct(void) {
         assert(vma != NULL);
         insert_vma_struct(mm, vma);
     }
-
+    cprintf("freepages:%d\n", nr_free_pages());
+    
     for (i = step1 + 1; i <= step2; i ++) {
         struct vma_struct *vma = vma_create(i * 5, i * 5 + 2, 0);
         assert(vma != NULL);
         insert_vma_struct(mm, vma);
     }
+    cprintf("freepages:%d\n", nr_free_pages());
 
     list_entry_t *le = list_next(&(mm->mmap_list));
 
@@ -217,7 +219,8 @@ check_vma_struct(void) {
         assert(vma1->vm_start == i  && vma1->vm_end == i  + 2);
         assert(vma2->vm_start == i  && vma2->vm_end == i  + 2);
     }
-
+    cprintf("freepages:%d\n", nr_free_pages());
+    
     for (i =4; i>=0; i--) {
         struct vma_struct *vma_below_5= find_vma(mm,i);
         if (vma_below_5 != NULL ) {
